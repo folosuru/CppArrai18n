@@ -32,8 +32,8 @@ Arrai18n::load("en-us.txt");
 ```
 ### use
 ```c++
-std::cout << Arrai18n::trl("main.saved","ja-JP",{"virus.exe", "iexplore.exe"})
-std::cout << Arrai18n::trl("main.saved","en-US",{"virus.exe", "iexplore.exe"})
+std::cout << Arrai18n::trl("main.saved","ja-JP",{"virus.exe", "iexplore.exe"}) << std::endl;
+std::cout << Arrai18n::trl("main.saved","en-US",{"virus.exe", "iexplore.exe"}) << std::endl;
 ```
 ### result
 ```

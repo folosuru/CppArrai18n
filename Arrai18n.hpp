@@ -16,23 +16,26 @@ namespace Arrai18n {
 typedef std::string lang_name;
 typedef std::string key_name;
 typedef std::vector<std::string> args_list;
-std::string trl(const std::string& text, const lang_name& lang_, const std::vector<std::string>&);
+std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>&);
 void load(const std::string&);
+
+struct trl_text {
+    key_name  key;
+    args_list args;
+};
+std::string trl(const lang_name& lang_, const trl_text& text);
+
 namespace data {
 class Node {
 public:
     [[nodiscard]]
     virtual std::string format(args_list) = 0;
-    virtual std::string getRaw() = 0;
 };
 class textNode : public Node {
 public:
     explicit textNode(std::string text_) : text(std::move(text_)) {}
     [[nodiscard]]
     std::string format(args_list) override {
-        return text;
-    }
-    std::string getRaw() override {
         return text;
     }
     std::string text;
@@ -43,9 +46,6 @@ public:
     [[nodiscard]]
     std::string format(args_list string) override {
         return string[index];
-    }
-    std::string getRaw() override {
-        return std::to_string(index);
     }
     size_t index;
 };
@@ -61,7 +61,6 @@ public:
     }
     std::vector<std::shared_ptr<Node>> node;
 };
-}
 typedef std::unordered_map<key_name, data::text> text_map;
 class General {
 private:
@@ -77,9 +76,10 @@ public:
     std::unordered_map<lang_name,text_map> lang_map;
 };
 General* General::instance = nullptr;
+}
 
 namespace parser {
-std::pair<lang_name, text_map> parse(std::ifstream);
+std::pair<lang_name, data::text_map> parse(std::ifstream);
 /**
  * get lang name
  * @param line e.g: "[ja-JP]"
@@ -105,10 +105,10 @@ data::text extract_format(const std::string& text);
 std::optional<std::pair<key_name, std::string>> parse_line(std::string line);
 
 
-std::pair<lang_name, text_map> parse(std::ifstream ifstream) {
+std::pair<lang_name, data::text_map> parse(std::ifstream ifstream) {
     std::string line;
     std::string lang_name;
-    text_map result_map;
+    data::text_map result_map;
     while (std::getline(ifstream, line)) {
         std::string trimmed = trim(line);
         if (trimmed[0] == '[') {
@@ -176,11 +176,12 @@ std::optional<std::pair<key_name , std::string>> parse_line(std::string line) {
     return std::make_pair(key,value);
 }
 data::text extract_format(const std::string& text) {
-    constexpr std::array<char,4> token_list{'"', '\\', '{', '}'};
+    constexpr std::array<char,6> token_list{'"', '\\', '{', '}', 'n', 'r'};
     std::vector<std::shared_ptr<data::Node>> nodes;
     std::string now_buffer;
     bool escape = false;
     bool in_param = false;
+    bool in_quote = false;
     for (const auto& i : text) {
         if (in_param) {
             if (i == '}') {
@@ -199,6 +200,12 @@ data::text extract_format(const std::string& text) {
             if (std::find(token_list.begin(), token_list.end(), i) == token_list.end()) {
                 throw std::runtime_error("parse error: invalid escape character");
             }
+            if (i == 'n') {
+                now_buffer += "\n";
+            }
+            if (i == 'r') {
+                now_buffer += "\r";
+            }
             now_buffer += i;
             escape = false;
             continue;
@@ -214,11 +221,13 @@ data::text extract_format(const std::string& text) {
             continue;
         }
         if (i == '"') {
-            if (!now_buffer.empty()) {
+            if (!in_quote) {  // 1回目のクオーテーションは無視
+                in_quote = true;
+                continue;
+            } else {  // 2回目のクオーテーションで切り上げ
                 nodes.push_back(std::shared_ptr<data::Node>(new data::textNode(now_buffer)));
-                now_buffer.clear();
+                break;
             }
-            continue;
         }
         now_buffer += i;
     }
@@ -230,10 +239,20 @@ std::string get_langName(std::string line) {
 }
 }
 void load(const std::string& file) {
-    General::getInstance()->lang_map.insert(parser::parse(std::ifstream(file)));
+    auto& map = data::General::getInstance()->lang_map;
+    auto lang_map = parser::parse(std::ifstream(file));
+    if (map.find(lang_map.first) == map.end()) {
+        data::General::getInstance()->lang_map.insert(lang_map);
+    } else {
+        data::General::getInstance()->lang_map.at(lang_map.first).merge(lang_map.second);
+    }
 }
-std::string trl(const std::string& text, const lang_name& lang_, const std::vector<std::string>& args) {
-    return General::getInstance()->lang_map.at(lang_).at(text).format(args);
+std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>& args) {
+    return data::General::getInstance()->lang_map.at(lang_).at(text).format(args);
+}
+
+std::string trl(const lang_name& lang_, const trl_text& text) {
+    return data::General::getInstance()->lang_map.at(lang_).at(text.key).format(text.args);
 }
 }
 

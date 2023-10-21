@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "Arrai18n.hpp"
+#include <CppArrai18n/Arrai18n.hpp>
 
 void make_LangFile();
 

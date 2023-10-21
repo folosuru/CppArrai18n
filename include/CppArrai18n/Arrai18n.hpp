@@ -16,14 +16,14 @@ namespace Arrai18n {
 typedef std::string lang_name;
 typedef std::string key_name;
 typedef std::vector<std::string> args_list;
-std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>&);
-void load(const std::string&);
+inline std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>&);
+inline void load(const std::string&);
 
 struct trl_text {
     key_name  key;
     args_list args;
 };
-std::string trl(const lang_name& lang_, const trl_text& text);
+inline std::string trl(const lang_name& lang_, const trl_text& text);
 
 namespace data {
 class Node {
@@ -65,7 +65,7 @@ typedef std::unordered_map<key_name, data::text> text_map;
 class General {
 private:
     General() = default;
-    static General* instance;
+    inline static General* instance = nullptr;
 public:
     static General* getInstance() {
         if (General::instance == nullptr) {
@@ -75,26 +75,25 @@ public:
     }
     std::unordered_map<lang_name,text_map> lang_map;
 };
-General* General::instance = nullptr;
 }
 
 namespace parser {
-std::pair<lang_name, data::text_map> parse(std::ifstream);
+inline std::pair<lang_name, data::text_map> parse(std::ifstream);
 /**
  * get lang name
  * @param line e.g: "[ja-JP]"
  * @return lang_name e.g.: "ja-JP"
  */
-lang_name get_langName(std::string line);
+inline lang_name get_langName(std::string line);
 
-std::string trim(std::string);
+inline std::string trim(std::string);
 
 /**
  * generate text.
  * @param text e.g.: ["hoge"]
  * @return data::text
  */
-data::text extract_format(const std::string& text);
+inline data::text extract_format(const std::string& text);
 
 /**
  * parse line...
@@ -102,10 +101,9 @@ data::text extract_format(const std::string& text);
  * @return optional{"a.b.c", "hogehoge"}
  * @return std::nullopt (when parse failed)
  */
-std::optional<std::pair<key_name, std::string>> parse_line(std::string line);
+inline std::optional<std::pair<key_name, std::string>> parse_line(std::string line);
 
-
-std::pair<lang_name, data::text_map> parse(std::ifstream ifstream) {
+inline std::pair<lang_name, data::text_map> parse(std::ifstream ifstream) {
     std::string line;
     std::string lang_name;
     data::text_map result_map;
@@ -124,11 +122,11 @@ std::pair<lang_name, data::text_map> parse(std::ifstream ifstream) {
     }
     return {lang_name,result_map};
 }
-std::string trim(std::string str) {
+inline std::string trim(std::string str) {
     return str.erase(0, str.find_first_not_of(' '))
         .erase(str.find_last_not_of(' ') + 1, str.size() - str.find_last_not_of(' '));
 }
-std::optional<std::pair<key_name , std::string>> parse_line(std::string line) {
+inline std::optional<std::pair<key_name , std::string>> parse_line(std::string line) {
     if (line[0] == '#') {
         return std::nullopt;
     }
@@ -175,7 +173,7 @@ std::optional<std::pair<key_name , std::string>> parse_line(std::string line) {
     }
     return std::make_pair(key,value);
 }
-data::text extract_format(const std::string& text) {
+inline data::text extract_format(const std::string& text) {
     constexpr std::array<char,6> token_list{'"', '\\', '{', '}', 'n', 'r'};
     std::vector<std::shared_ptr<data::Node>> nodes;
     std::string now_buffer;
@@ -233,12 +231,12 @@ data::text extract_format(const std::string& text) {
     }
     return data::text(nodes);
 }
-std::string get_langName(std::string line) {
+inline std::string get_langName(std::string line) {
     auto text = trim(std::move(line));
     return text.substr(1,text.size()-2);
 }
 }
-void load(const std::string& file) {
+inline void load(const std::string& file) {
     auto& map = data::General::getInstance()->lang_map;
     auto lang_map = parser::parse(std::ifstream(file));
     if (map.find(lang_map.first) == map.end()) {
@@ -247,11 +245,11 @@ void load(const std::string& file) {
         data::General::getInstance()->lang_map.at(lang_map.first).merge(lang_map.second);
     }
 }
-std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>& args) {
+inline std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>& args) {
     return data::General::getInstance()->lang_map.at(lang_).at(text).format(args);
 }
 
-std::string trl(const lang_name& lang_, const trl_text& text) {
+inline std::string trl(const lang_name& lang_, const trl_text& text) {
     return data::General::getInstance()->lang_map.at(lang_).at(text.key).format(text.args);
 }
 }

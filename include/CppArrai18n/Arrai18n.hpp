@@ -245,7 +245,7 @@ inline void load(const std::string& file) {
         data::General::getInstance()->lang_map.at(lang_map.first).merge(lang_map.second);
     }
 }
-inline std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>& args) {
+inline std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>& args = {}) {
     return data::General::getInstance()->lang_map.at(lang_).at(text).format(args);
 }
 

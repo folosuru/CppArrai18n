@@ -16,6 +16,7 @@ namespace Arrai18n {
 typedef std::string lang_name;
 typedef std::string key_name;
 typedef std::vector<std::string> args_list;
+
 inline std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>&);
 inline void load(const std::string&);
 
@@ -29,13 +30,13 @@ namespace data {
 class Node {
 public:
     [[nodiscard]]
-    virtual std::string format(args_list) = 0;
+    virtual std::string format(const args_list&) = 0;
 };
 class textNode : public Node {
 public:
     explicit textNode(std::string text_) : text(std::move(text_)) {}
     [[nodiscard]]
-    std::string format(args_list) override {
+    std::string format(const args_list&) override {
         return text;
     }
     std::string text;
@@ -44,11 +45,12 @@ class replaceNode : public Node {
 public:
     explicit replaceNode(size_t index_): index(index_) {}
     [[nodiscard]]
-    std::string format(args_list string) override {
+    std::string format(const args_list& string) override {
         return string[index];
     }
     size_t index;
 };
+
 class text {
 public:
     explicit text(std::vector<std::shared_ptr<Node>> node_) : node(std::move(node_)){}

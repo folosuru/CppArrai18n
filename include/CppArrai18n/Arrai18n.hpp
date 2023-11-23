@@ -13,17 +13,17 @@
 #include <vector>
 #include <memory>
 namespace Arrai18n {
-typedef std::string lang_name;
-typedef std::string key_name;
-typedef std::vector<std::string> args_list;
-
-inline std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>&);
-inline void load(const std::string&);
+using lang_name = std::string;
+using key_name = std::string;
+using args_list = std::vector<std::string>;
 
 struct trl_text {
     key_name  key;
     args_list args;
 };
+inline void load(const std::string&);
+inline void setDefaultLanguage(const lang_name&);
+inline std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>&);
 inline std::string trl(const lang_name& lang_, const trl_text& text);
 
 namespace data {
@@ -63,6 +63,7 @@ public:
     }
     std::vector<std::shared_ptr<Node>> node;
 };
+
 typedef std::unordered_map<key_name, data::text> text_map;
 class General {
 private:
@@ -75,7 +76,8 @@ public:
         }
         return General::instance;
     }
-    std::unordered_map<lang_name,text_map> lang_map;
+    std::unordered_map<lang_name,std::shared_ptr<text_map>> lang_map;
+    std::shared_ptr<text_map> default_lang;
 };
 }
 
@@ -242,18 +244,38 @@ inline void load(const std::string& file) {
     auto& map = data::General::getInstance()->lang_map;
     auto lang_map = parser::parse(std::ifstream(file));
     if (map.find(lang_map.first) == map.end()) {
-        data::General::getInstance()->lang_map.insert(lang_map);
+        data::General::getInstance()->lang_map.insert({lang_map.first, std::make_shared<data::text_map>(lang_map.second)});
     } else {
-        data::General::getInstance()->lang_map.at(lang_map.first).merge(lang_map.second);
+        data::General::getInstance()->lang_map.at(lang_map.first)->merge(lang_map.second);
     }
 }
+
+inline std::shared_ptr<data::text_map> getLanguageTextMap(const lang_name& lang_);
+
 inline std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>& args = {}) {
-    return data::General::getInstance()->lang_map.at(lang_).at(text).format(args);
+    return data::General::getInstance()->lang_map.at(lang_)->at(text).format(args);
 }
 
 inline std::string trl(const lang_name& lang_, const trl_text& text) {
-    return data::General::getInstance()->lang_map.at(lang_).at(text.key).format(text.args);
+    return getLanguageTextMap(lang_)->at(text.key).format(text.args);
 }
+
+inline std::shared_ptr<data::text_map> getLanguageTextMap(const lang_name& lang_) {
+    auto& lang_map = data::General::getInstance()->lang_map;
+    if (auto result = lang_map.find(lang_); result != lang_map.end()) {
+        return result->second;
+    } else if (auto result_default = data::General::getInstance()->default_lang; result_default) {
+        return result_default;
+    } else {
+        throw std::runtime_error("cannot find language");
+    }
+}
+
+
+void setDefaultLanguage(const lang_name& default_lang) {
+    data::General::getInstance()->default_lang = data::General::getInstance()->lang_map.at(default_lang);
+}
+
 }
 
 #endif // CPPARRAI18N_CPPARRAI18N_HPP_

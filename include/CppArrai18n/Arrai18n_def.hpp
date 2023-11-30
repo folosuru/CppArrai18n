@@ -24,7 +24,7 @@ inline void load(const std::string&);
 
 inline void setDefaultLanguage(const lang_name&);
 
-inline std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>&);
+inline std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>&  args = {});
 
 inline std::string trl(const lang_name& lang_, const trl_text& text);
 

@@ -251,7 +251,7 @@ inline std::string GetText(const lang_name& lang_, const std::string& text, cons
     }
 }
 
-inline std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>& args = {}) {
+inline std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>& args) {
     return GetText(lang_, text, args);
 }
 inline std::string trl(const lang_name& lang_, const trl_text& text) {

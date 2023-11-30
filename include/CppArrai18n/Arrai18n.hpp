@@ -1,31 +1,17 @@
 #pragma once
 #ifndef CPPARRAI18N_CPPARRAI18N_HPP_
 #define CPPARRAI18N_CPPARRAI18N_HPP_
+#include "Arrai18n_def.hpp"
 #include <fstream>
-#include <string>
 #include <unordered_map>
 #include <optional>
 #include <unordered_set>
-#include <array>
 #include <algorithm>
 #include <utility>
-#include <string>
-#include <vector>
 #include <memory>
+#include <array>
+
 namespace Arrai18n {
-using lang_name = std::string;
-using key_name = std::string;
-using args_list = std::vector<std::string>;
-
-struct trl_text {
-    key_name  key;
-    args_list args;
-};
-inline void load(const std::string&);
-inline void setDefaultLanguage(const lang_name&);
-inline std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>&);
-inline std::string trl(const lang_name& lang_, const trl_text& text);
-
 namespace data {
 class Node {
 public:

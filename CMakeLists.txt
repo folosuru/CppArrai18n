@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.23)
-project(CppArrai18n_example)
+project(CppArrai18n CXX)
 set(CMAKE_CXX_STANDARD 17)
-add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
-add_executable(CppArrai18n_example example.cpp)
-target_include_directories(CppArrai18n_example
-        PRIVATE include)
+add_library(CppArrai18n STATIC
+        ${PROJECT_SOURCE_DIR}/include/CppArrai18n/Arrai18n_def.hpp
+        ${PROJECT_SOURCE_DIR}/include/CppArrai18n/Arrai18n.hpp
+)
+set_target_properties(CppArrai18n PROPERTIES LINKER_LANGUAGE CXX)

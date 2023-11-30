@@ -20,13 +20,13 @@ struct trl_text {
     args_list args;
 };
 
-inline void load(const std::string&);
+void load(const std::string&);
 
-inline void setDefaultLanguage(const lang_name&);
+void setDefaultLanguage(const lang_name&);
 
-inline std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>&  args = {});
+std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>&  args = {});
 
-inline std::string trl(const lang_name& lang_, const trl_text& text);
+std::string trl(const lang_name& lang_, const trl_text& text);
 
 }
 #endif //CPPARRAI18N_INCLUDE_CPPARRAI18N_ARRAI18N_DEF_HPP_

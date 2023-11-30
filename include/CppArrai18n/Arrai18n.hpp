@@ -242,7 +242,7 @@ inline void load(const std::string& file) {
 
 inline std::shared_ptr<data::text_map> getLanguageTextMap(const lang_name& lang_);
 
-std::string GetText(const lang_name& lang_, const std::string& text, const std::vector<std::string>& args) {
+inline std::string GetText(const lang_name& lang_, const std::string& text, const std::vector<std::string>& args) {
     auto lang_text_map = getLanguageTextMap(lang_);
     if (auto result = lang_text_map->find(text); result != lang_text_map->end()) {
         return result->second.format(args);
@@ -270,7 +270,7 @@ inline std::shared_ptr<data::text_map> getLanguageTextMap(const lang_name& lang_
 }
 
 
-void setDefaultLanguage(const lang_name& default_lang) {
+inline void setDefaultLanguage(const lang_name& default_lang) {
     data::General::getInstance()->default_lang = data::General::getInstance()->lang_map.at(default_lang);
 }
 

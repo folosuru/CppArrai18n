@@ -30,13 +30,13 @@ namespace data {
 class Node {
 public:
     [[nodiscard]]
-    virtual std::string format(const args_list&) = 0;
+    virtual std::string format(const args_list&) const noexcept = 0;
 };
 class textNode : public Node {
 public:
     explicit textNode(std::string text_) : text(std::move(text_)) {}
     [[nodiscard]]
-    std::string format(const args_list&) override {
+    std::string format(const args_list&) const noexcept override {
         return text;
     }
     std::string text;
@@ -45,7 +45,7 @@ class replaceNode : public Node {
 public:
     explicit replaceNode(size_t index_): index(index_) {}
     [[nodiscard]]
-    std::string format(const args_list& string) override {
+    std::string format(const args_list& string) const noexcept override {
         return string[index];
     }
     size_t index;
@@ -54,7 +54,8 @@ public:
 class text {
 public:
     explicit text(std::vector<std::shared_ptr<Node>> node_) : node(std::move(node_)){}
-    std::string format(const args_list& args) {
+    [[nodiscard]]
+    std::string format(const args_list& args) const noexcept {
         std::string result;
         for (const auto & i :node) {
             result.append(i->format(args));
@@ -79,7 +80,7 @@ public:
     std::unordered_map<lang_name,std::shared_ptr<text_map>> lang_map;
     std::shared_ptr<text_map> default_lang;
 };
-}
+}  // data
 
 namespace parser {
 inline std::pair<lang_name, data::text_map> parse(std::ifstream);
@@ -255,12 +256,20 @@ inline void load(const std::string& file) {
 
 inline std::shared_ptr<data::text_map> getLanguageTextMap(const lang_name& lang_);
 
-inline std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>& args = {}) {
-    return data::General::getInstance()->lang_map.at(lang_)->at(text).format(args);
+std::string GetText(const lang_name& lang_, const std::string& text, const std::vector<std::string>& args) {
+    auto lang_text_map = getLanguageTextMap(lang_);
+    if (auto result = lang_text_map->find(text); result != lang_text_map->end()) {
+        return result->second.format(args);
+    } else {
+        return "Arrai18n: [" + text + "] is not found in language " + lang_;
+    }
 }
 
+inline std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>& args = {}) {
+    return GetText(lang_, text, args);
+}
 inline std::string trl(const lang_name& lang_, const trl_text& text) {
-    return getLanguageTextMap(lang_)->at(text.key).format(text.args);
+    return GetText(lang_, text.key, text.args);
 }
 
 inline std::shared_ptr<data::text_map> getLanguageTextMap(const lang_name& lang_) {

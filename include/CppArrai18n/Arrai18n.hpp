@@ -111,6 +111,9 @@ inline std::pair<lang_name, data::text_map> parse(std::ifstream ifstream) {
     std::string line;
     std::string lang_name;
     data::text_map result_map;
+    if (!ifstream) {
+        throw std::runtime_error("cannnot read file!");
+    }
     while (std::getline(ifstream, line)) {
         std::string trimmed = trim(line);
         if (trimmed[0] == '[') {

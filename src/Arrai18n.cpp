@@ -230,7 +230,7 @@ inline std::string get_langName(std::string line) {
     return text.substr(1,text.size()-2);
 }
 }
-inline void load(const std::string& file) {
+void load(const std::string& file) {
     auto& map = data::General::getInstance()->lang_map;
     auto lang_map = parser::parse(std::ifstream(file));
     if (map.find(lang_map.first) == map.end()) {
@@ -251,10 +251,10 @@ inline std::string GetText(const lang_name& lang_, const std::string& text, cons
     }
 }
 
-inline std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>& args) {
+std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>& args) {
     return GetText(lang_, text, args);
 }
-inline std::string trl(const lang_name& lang_, const trl_text& text) {
+std::string trl(const lang_name& lang_, const trl_text& text) {
     return GetText(lang_, text.key, text.args);
 }
 
@@ -270,7 +270,7 @@ inline std::shared_ptr<data::text_map> getLanguageTextMap(const lang_name& lang_
 }
 
 
-inline void setDefaultLanguage(const lang_name& default_lang) {
+void setDefaultLanguage(const lang_name& default_lang) {
     data::General::getInstance()->default_lang = data::General::getInstance()->lang_map.at(default_lang);
 }
 

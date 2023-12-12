@@ -1,7 +1,6 @@
 #pragma once
 #ifndef CPPARRAI18N_CPPARRAI18N_HPP_
 #define CPPARRAI18N_CPPARRAI18N_HPP_
-#include "Arrai18n_def.hpp"
 #include <fstream>
 #include <unordered_map>
 #include <optional>
@@ -12,6 +11,22 @@
 #include <array>
 
 namespace Arrai18n {
+using lang_name = std::string;
+using key_name = std::string;
+using args_list = std::vector<std::string>;
+
+/**
+ * This file is header-only.
+ *
+ * if you want to use header-only library, include this.
+ * if you want to use static library, include "Arrai18n_def.hpp"
+ */
+
+struct trl_text {
+    key_name key;
+    args_list args;
+};
+
 namespace data {
 class Node {
 public:

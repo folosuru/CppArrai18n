@@ -52,20 +52,10 @@ public:
 };
 
 typedef std::unordered_map<key_name, data::text> text_map;
-class General {
-private:
-    General() = default;
-    inline static General* instance = nullptr;
-public:
-    static General* getInstance() {
-        if (General::instance == nullptr) {
-            General::instance = new General();
-        }
-        return General::instance;
-    }
-    std::unordered_map<lang_name,std::shared_ptr<text_map>> lang_map;
-    std::shared_ptr<text_map> default_lang;
-};
+
+std::unordered_map<lang_name,std::shared_ptr<text_map>> lang_map;
+std::shared_ptr<text_map> default_lang;
+
 }  // data
 
 namespace parser {
@@ -75,9 +65,9 @@ inline std::pair<lang_name, data::text_map> parse(std::ifstream);
  * @param line e.g: "[ja-JP]"
  * @return lang_name e.g.: "ja-JP"
  */
-inline lang_name get_langName(std::string line);
+inline lang_name get_langName(std::string line) noexcept;
 
-inline std::string trim(std::string);
+inline std::string trim(std::string) noexcept;
 
 /**
  * generate text.
@@ -116,7 +106,7 @@ inline std::pair<lang_name, data::text_map> parse(std::ifstream ifstream) {
     }
     return {lang_name,result_map};
 }
-inline std::string trim(std::string str) {
+inline std::string trim(std::string str) noexcept {
     return str.erase(0, str.find_first_not_of(' '))
         .erase(str.find_last_not_of(' ') + 1, str.size() - str.find_last_not_of(' '));
 }
@@ -225,18 +215,18 @@ inline data::text extract_format(const std::string& text) {
     }
     return data::text(nodes);
 }
-inline std::string get_langName(std::string line) {
+inline std::string get_langName(std::string line) noexcept {
     auto text = trim(std::move(line));
     return text.substr(1,text.size()-2);
 }
 }
 void load(const std::string& file) {
-    auto& map = data::General::getInstance()->lang_map;
+    auto& map = data::lang_map;
     auto lang_map = parser::parse(std::ifstream(file));
     if (map.find(lang_map.first) == map.end()) {
-        data::General::getInstance()->lang_map.insert({lang_map.first, std::make_shared<data::text_map>(lang_map.second)});
+        data::lang_map.insert({lang_map.first, std::make_shared<data::text_map>(lang_map.second)});
     } else {
-        data::General::getInstance()->lang_map.at(lang_map.first)->merge(lang_map.second);
+        data::lang_map.at(lang_map.first)->merge(lang_map.second);
     }
 }
 
@@ -259,10 +249,10 @@ std::string trl(const lang_name& lang_, const trl_text& text) {
 }
 
 inline std::shared_ptr<data::text_map> getLanguageTextMap(const lang_name& lang_) {
-    auto& lang_map = data::General::getInstance()->lang_map;
+    auto& lang_map = data::lang_map;
     if (auto result = lang_map.find(lang_); result != lang_map.end()) {
         return result->second;
-    } else if (auto result_default = data::General::getInstance()->default_lang; result_default) {
+    } else if (auto result_default = data::default_lang; result_default) {
         return result_default;
     } else {
         throw std::runtime_error("cannot find language");
@@ -271,7 +261,7 @@ inline std::shared_ptr<data::text_map> getLanguageTextMap(const lang_name& lang_
 
 
 void setDefaultLanguage(const lang_name& default_lang) {
-    data::General::getInstance()->default_lang = data::General::getInstance()->lang_map.at(default_lang);
+    data::default_lang = data::lang_map.at(default_lang);
 }
 
 }

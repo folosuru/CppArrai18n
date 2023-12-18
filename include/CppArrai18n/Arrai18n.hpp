@@ -288,7 +288,18 @@ inline std::shared_ptr<data::text_map> getLanguageTextMap(const lang_name& lang_
 inline void setDefaultLanguage(const lang_name& default_lang) {
     data::General::getInstance()->default_lang = data::General::getInstance()->lang_map.at(default_lang);
 }
+template<class T> std::string conv_string(T value) {
+    if constexpr(std::is_convertible_v<T,std::string> ) {
+        return value;
+    } else {
+        return std::to_string(value);
+    }
+}
 
+template<class... Args>
+std::string trl(const lang_name& lang_, const std::string& text, Args... args) {
+    return trl(lang_, text,{conv_string(args)...});
+}
 }
 
 #endif // CPPARRAI18N_CPPARRAI18N_HPP_

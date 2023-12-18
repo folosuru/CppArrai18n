@@ -26,6 +26,19 @@ void setDefaultLanguage(const lang_name&);
 
 std::string trl(const lang_name& lang_, const std::string& text, const std::vector<std::string>&  args = {});
 
+template<class T> std::string conv_string(T value) {
+    if constexpr(std::is_convertible_v<T,std::string> ) {
+        return value;
+    } else {
+        return std::to_string(value);
+    }
+}
+
+template<class... Args>
+std::string trl(const lang_name& lang_, const std::string& text, Args... args) {
+    return trl(lang_, text,{conv_string(args)...});
+}
+
 std::string trl(const lang_name& lang_, const trl_text& text);
 
 }

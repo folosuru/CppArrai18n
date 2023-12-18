@@ -26,6 +26,7 @@ int main() {
     // trl("language code", trl_text);
     std::cout << Arrai18n::trl("ja-JP", text) << std::endl;
     std::cout << Arrai18n::trl("en-US", text) << std::endl;
+    std::cout << "\n" << std::endl;
 
     Arrai18n::setDefaultLanguage("ja-JP");
     std::cout << Arrai18n::trl("unknown_language", text) << std::endl;

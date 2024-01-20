@@ -184,9 +184,13 @@ inline data::text extract_format(const std::string& text) {
             }
             if (i == 'n') {
                 now_buffer += "\n";
+            	escape = false;
+				continue;
             }
             if (i == 'r') {
                 now_buffer += "\r";
+            	escape = false;
+				continue;
             }
             now_buffer += i;
             escape = false;
